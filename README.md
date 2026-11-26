@@ -6,37 +6,13 @@ This kit builds Shaurya's learning-guide website from the course PDFs in his Dat
 
 The site is published in two places:
 
-* **claude.ai artifact "Learning Console"**, slug `ba456835-1886-4bf3-8411-99fcc184d209`
-  (https://claude.ai/artifact/Q16DrDbrJC5ZaJjkoYELuW). This is the one to update. The older artifact
-  `ce453f3e-1c1c-457d-9531-6abfbb2f9061` (the first design) is no longer updated. claude.ai pages cannot play YouTube
-  inside them, so there the videos open on YouTube.
-* **Desktop copy** at `/Users/shaurya/Desktop/Data/Learning Guide/`: the same files under `site/`, plus
-  `Open Learning Guide.command` (serves `site/` on http://localhost:8765 and opens the browser) and `READ ME.txt`.
-  Here the videos play inside the page.
-
-## What is in the kit
-
-| Path | Purpose |
-|---|---|
-| `build_slides.py` | Scans the module folders for PDFs; renders pages, extracts text, writes `site/slides/index.js` plus one pack per deck (`site/slides/<id>.js` and `<id>.webp`). It caches by size + content hash in `site/slides/.cache.json`, so only new or changed PDFs are rendered. Nicer deck titles go in its `TITLES` dict. |
-| `dsl.py` | The authoring language for lessons (see below). It attaches each lesson's videos from `videos.py`. |
-| `videos.py` | `VIDEOS = {lesson_id: [v(youtube_id, title, channel, note)]}`: one to three videos per lesson, shown first in the lesson. `note` says what to watch for. |
-| `lessons/*.py` | The lessons, one file per group, imported in sorted order: `a_py.py` (Python), `b_ml1.py` and `c_ml2.py` (machine learning), `e_dm.py` (discrete maths), `f_spi.py` (social and professional issues). |
-| `build_content.py` | Runs every code cell for real, checks modify, bug and make solutions, and writes `site/content/lessons.js` (full build only). It exits 1 and lists PROBLEMS if anything fails. |
-| `runtime/guide_runtime.py` | The Python runtime used both by the build and by the page (Pyodide). |
-| `datafiles/` | The datasets the code cells open. The page loads them from `site/data/<name>.js`, which are already published. |
-| `make_data.py` | Shows how datasets were collected and wrapped as `GUIDE.file(name, "text" or "base64", payload);` |
-| `site/` | The page: `index.html`, `css/site.css`, `js/*.js`, plus generated `content/lessons.js` and `slides/index.js`. |
-| `manifest.json` | The course files (relative to the Data folder, `.pdf` and `.ipynb`, mapped to size in bytes) that the current site was built from. |
-| `NOTES.md` | Working notes on the modules, the research behind the teaching design, and the student's misconceptions. |
-
 ## How the page teaches (front end)
 
 * `js/app.js`: saved progress, mastery, navigation, home dashboard, course pages, Refresh knowledge (spaced
   review), Strengthen (missed questions), Exam practice (15 timed questions per module), playground, method page.
 * `js/lesson.js`: the lesson page. Order: Watch (videos) → steps → mastery check. Step-by-step mode reveals one step
   at a time (a step ends at each interactive block). Videos embed with youtube-nocookie wherever the host allows it
-  and fall back to YouTube links on claude.ai.
+  and fall back to YouTube links 
 * Mastery ring = share of a lesson's questions answered correctly (red < 50%, amber 50–79%, green ≥ 80%). Questions
   are every `prime`, every `code` predict with options, and every quiz item. Their ids are
   `<lesson>:<block index>:p`, `:pred` and `:<item index>`, so **never insert or reorder blocks in an existing
@@ -100,12 +76,12 @@ coursework file names.
    kept in the kit, so only new or changed decks have one), and any changed `js/`, `css/` or `data/` file.
    Keep each call under 64 MiB. Never publish `site/slides/<id>/` page folders or `.cache.json`.
    If the session has the single `Artifact` tool instead (actions `read`, `list`, `publish`): read
-   `https://claude.ai/code/artifact/ba456835-1886-4bf3-8411-99fcc184d209`, list its files (`scope: "files"`), then
+   `https://code/artifact/ba456835-1886-4bf3-8411-99fcc184d209`, list its files (`scope: "files"`), then
    publish with that `url`, the changed files in `files` (files left out are kept) and `file_path` =
    `site/index.body.html`. That tool wraps the page in its own doctype/head/body skeleton, so `index.body.html` is the
    same page as `index.html` without the `<!DOCTYPE>`, `<html>`, `<head>` and `<body>` tags. Keep the two in step, and
    never write `index.body.html` over the desktop copy's `index.html`.
-   The `mcp__claude-artifacts__` publish tools refuse public artifacts. If a publish is refused, say so; do not work
+   The `mcp-artifacts__` publish tools refuse public artifacts. If a publish is refused, say so; do not work
    around it.
 7. Refresh the desktop copy: copy the same changed files into `/mnt/user-data/outputs/`, then `device_commit_files`
    each to `/Users/shaurya/Desktop/Data/Learning Guide/site/<same path>` (at most 50 files per call).
